@@ -1,0 +1,46 @@
+# ─── Python / Backend ────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+
+# SQLite database (don't push real contest data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Byte-compiled
+*.pyc
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# ─── Node / Frontend ─────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ─── OS / Editor ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Logs ────────────────────────────────────────────────────
+*.log
+npm-debug.log*
