@@ -102,6 +102,14 @@ export default function Register() {
             Login here
           </span>
         </p>
+        <p className="text-center mt-3">
+          <span
+            className="text-gray-700 hover:text-gray-500 text-xs cursor-pointer transition"
+            onClick={() => navigate('/teacher')}
+          >
+            Teacher / Organizer Login
+          </span>
+        </p>
       </div>
 
       {/* Round Overview */}

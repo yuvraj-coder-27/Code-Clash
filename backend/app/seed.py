@@ -7,18 +7,19 @@ SEED_QUESTIONS = [
 
     # ═══════════════════════════════════════════════════════════
     # ROUND 1 — Bug Finding & Fixing (C / C++)
+    # Only 2 questions. No hints or BUG comments in code.
     # ═══════════════════════════════════════════════════════════
 
     {
         "round": 1, "order": 1, "language": "c", "points": 20,
-        "title": "Array Sum Off-By-One",
-        "description": "The function below should return the sum of all elements in the array of size n. Fix the bug.",
+        "title": "Array Sum",
+        "description": "The function below should return the sum of all elements in the array of size n. Find and fix the error in the code.",
         "code_template": """\
 #include <stdio.h>
 
 int arraySum(int arr[], int n) {
     int sum = 0;
-    for (int i = 0; i <= n; i++) {  // BUG: off-by-one
+    for (int i = 0; i <= n; i++) {
         sum += arr[i];
     }
     return sum;
@@ -40,14 +41,14 @@ int main() {
 
     {
         "round": 1, "order": 2, "language": "cpp", "points": 20,
-        "title": "Factorial Null Pointer",
-        "description": "Fix the recursive factorial function below. It crashes for n=0.",
+        "title": "Factorial Function",
+        "description": "The recursive factorial function below is not working correctly for all inputs. Identify the bug and fix it.",
         "code_template": """\
 #include <iostream>
 using namespace std;
 
 int factorial(int n) {
-    if (n == 1) return 1;  // BUG: should handle n == 0
+    if (n == 1) return 1;
     return n * factorial(n - 1);
 }
 
@@ -64,42 +65,14 @@ int main() {
         ],
     },
 
-    {
-        "round": 1, "order": 3, "language": "c", "points": 20,
-        "title": "String Reverse Wrong Index",
-        "description": "The code below tries to reverse a string in-place. Fix the bug so it correctly reverses the input.",
-        "code_template": """\
-#include <stdio.h>
-#include <string.h>
-
-void reverseStr(char s[], int len) {
-    for (int i = 0; i < len; i++) {   // BUG: should stop at len/2
-        char tmp = s[i];
-        s[i] = s[len - 1 - i];
-        s[len - 1 - i] = tmp;
-    }
-}
-
-int main() {
-    char s[200];
-    scanf("%s", s);
-    reverseStr(s, strlen(s));
-    printf("%s\\n", s);
-    return 0;
-}""",
-        "test_cases": [
-            {"input": "hello\n", "expected_output": "olleh", "is_hidden": False},
-            {"input": "abcde\n", "expected_output": "edcba", "is_hidden": True},
-        ],
-    },
-
     # ═══════════════════════════════════════════════════════════
-    # ROUND 2 — Guess the Output (MCQ: C & Python)
+    # ROUND 2 — Guess the Output (MCQ: C only)
+    # Removed all Python questions. Added a new C question.
     # ═══════════════════════════════════════════════════════════
 
     {
         "round": 2, "order": 1, "language": "c", "points": 10,
-        "title": "C Pre/Post Increment Puzzle",
+        "title": "Pre/Post Increment",
         "description": "What is the output of the following C code?",
         "code_template": """\
 #include <stdio.h>
@@ -114,36 +87,8 @@ int main() {
     },
 
     {
-        "round": 2, "order": 2, "language": "python", "points": 10,
-        "title": "Python Mutable Default Argument",
-        "description": "What does this Python code print?",
-        "code_template": """\
-def add(val, lst=[]):
-    lst.append(val)
-    return lst
-
-print(add(1))
-print(add(2))""",
-        "mcq_options": ["[1]\n[2]", "[1]\n[1, 2]", "[1, 2]\n[1, 2]", "Error"],
-        "correct_option_index": 1,
-        "test_cases": None,
-    },
-
-    {
-        "round": 2, "order": 3, "language": "python", "points": 10,
-        "title": "Python List Slicing",
-        "description": "What is the output of the following Python snippet?",
-        "code_template": """\
-a = [1, 2, 3, 4, 5]
-print(a[1:4:2])""",
-        "mcq_options": ["[2, 4]", "[2, 3, 4]", "[1, 3, 5]", "[2, 4, 5]"],
-        "correct_option_index": 0,
-        "test_cases": None,
-    },
-
-    {
-        "round": 2, "order": 4, "language": "c", "points": 10,
-        "title": "C Integer Division",
+        "round": 2, "order": 2, "language": "c", "points": 10,
+        "title": "Integer Division",
         "description": "What does this C code output?",
         "code_template": """\
 #include <stdio.h>
@@ -157,8 +102,27 @@ int main() {
         "test_cases": None,
     },
 
+    {
+        "round": 2, "order": 3, "language": "c", "points": 10,
+        "title": "Pointer Arithmetic",
+        "description": "What is the output of the following C program?",
+        "code_template": """\
+#include <stdio.h>
+int main() {
+    int arr[] = {10, 20, 30, 40, 50};
+    int *p = arr;
+    p += 2;
+    printf("%d\\n", *p);
+    return 0;
+}""",
+        "mcq_options": ["10", "20", "30", "40"],
+        "correct_option_index": 2,
+        "test_cases": None,
+    },
+
     # ═══════════════════════════════════════════════════════════
-    # ROUND 3 — Reverse Coding (C / C++ / Python)
+    # ROUND 3 — Reverse Coding
+    # Only 1 question. Starter code with comment to write output.
     # ═══════════════════════════════════════════════════════════
 
     {
@@ -181,54 +145,22 @@ Output:
 1
 1 2
 1 2 3""",
-        "code_template": "# Write your solution in C, C++, or Python\n",
+        "code_template": """\
+# ─────────────────────────────────────────
+# Reverse Coding Challenge
+# Read the input below and study the
+# sample output shown on the left panel.
+# Write your logic to produce the same output.
+# ─────────────────────────────────────────
+
+n = int(input())
+
+# Write your output here:
+""",
         "test_cases": [
             {"input": "3\n", "expected_output": "1\n1 2\n1 2 3", "is_hidden": False},
             {"input": "1\n", "expected_output": "1", "is_hidden": False},
             {"input": "5\n", "expected_output": "1\n1 2\n1 2 3\n1 2 3 4\n1 2 3 4 5", "is_hidden": True},
-        ],
-    },
-
-    {
-        "round": 3, "order": 2, "language": "python", "points": 30,
-        "title": "Sum of Digits",
-        "description": """\
-Given a positive integer N, compute the sum of its digits.
-
-Sample:
-Input: 1234
-Output: 10
-
-Input: 99
-Output: 18""",
-        "code_template": "# Write your solution in C, C++, or Python\n",
-        "test_cases": [
-            {"input": "1234\n", "expected_output": "10", "is_hidden": False},
-            {"input": "99\n", "expected_output": "18", "is_hidden": False},
-            {"input": "1000\n", "expected_output": "1", "is_hidden": True},
-            {"input": "9999\n", "expected_output": "36", "is_hidden": True},
-        ],
-    },
-
-    {
-        "round": 3, "order": 3, "language": "python", "points": 30,
-        "title": "Palindrome Check",
-        "description": """\
-Given a string, print YES if it is a palindrome, otherwise print NO.
-Ignore case.
-
-Sample:
-Input: racecar
-Output: YES
-
-Input: hello
-Output: NO""",
-        "code_template": "# Write your solution in C, C++, or Python\n",
-        "test_cases": [
-            {"input": "racecar\n", "expected_output": "YES", "is_hidden": False},
-            {"input": "hello\n", "expected_output": "NO", "is_hidden": False},
-            {"input": "Madam\n", "expected_output": "YES", "is_hidden": True},
-            {"input": "OpenAI\n", "expected_output": "NO", "is_hidden": True},
         ],
     },
 ]
