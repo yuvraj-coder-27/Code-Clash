@@ -13,7 +13,7 @@ from ..config import ROUND_CONFIG
 router = APIRouter(prefix="/submit", tags=["submissions"])
 
 
-# ─── Helpers ──────────────────────────────────────────────────────────────────
+# --- Helpers ---
 
 def _get_or_create_submission(db, user_id, question_id, round_num) -> Submission:
     """Return the existing submission record or a fresh one."""
@@ -42,7 +42,7 @@ async def _evaluate_async(language: str, code: str, test_cases: list) -> dict:
     )
 
 
-# ─── Round 1: Bug Finding & Fixing ────────────────────────────────────────────
+# --- Round 1: Bug Finding & Fixing ---
 
 @router.post("/round1", response_model=SubmissionOut)
 async def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
@@ -60,11 +60,9 @@ async def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
     if sub.attempts_used >= max_attempts:
         raise HTTPException(status_code=403, detail="No attempts remaining. Question is locked.")
 
-    # Validate language is c or cpp only
     if data.language not in ("c", "cpp"):
         raise HTTPException(status_code=400, detail="Round 1 only supports C and C++")
 
-    # Track round start time
     user = db.query(User).filter(User.id == data.user_id).first()
     if user and not user.r1_start:
         user.r1_start = datetime.utcnow()
@@ -73,16 +71,14 @@ async def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
     sub.submitted_code = data.code
     sub.submitted_at = datetime.utcnow()
 
-    # ← runs in thread pool; event loop free to handle other requests
     eval_result = await _evaluate_async(data.language, data.code, q.test_cases or [])
     sub.test_results = eval_result["results"]
 
     if eval_result["ratio"] == 1.0:
         sub.is_correct = True
-        # Marks decrease per attempt: 100% → 80% → 60%
         pct = [1.0, 0.8, 0.6][sub.attempts_used - 1]
         sub.marks_awarded = round(q.points * pct, 2)
-        sub.execution_output = "✅ All test cases passed!"
+        sub.execution_output = "[PASS] All test cases passed!"
         if user:
             user.r1_end = datetime.utcnow()
     else:
@@ -90,14 +86,14 @@ async def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
         total  = eval_result["total"]
         sub.is_correct = False
         sub.marks_awarded = 0.0
-        sub.execution_output = f"❌ {passed}/{total} test cases passed"
+        sub.execution_output = f"[FAIL] {passed}/{total} test cases passed"
 
     db.commit()
     db.refresh(sub)
     return sub
 
 
-# ─── Round 2: Guess the Output (MCQ) ─────────────────────────────────────────
+# --- Round 2: Guess the Output (MCQ) ---
 
 @router.post("/round2", response_model=SubmissionOut)
 async def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
@@ -122,11 +118,11 @@ async def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
     if data.selected_option == correct:
         sub.is_correct = True
         sub.marks_awarded = float(q.points)
-        sub.execution_output = "✅ Correct!"
+        sub.execution_output = "[CORRECT]"
     else:
         sub.is_correct = False
         sub.marks_awarded = 0.0
-        sub.execution_output = f"❌ Incorrect. Correct answer was option {correct + 1}."
+        sub.execution_output = f"[WRONG] Correct answer was option {correct + 1}."
 
     if user:
         user.r2_end = datetime.utcnow()
@@ -136,7 +132,7 @@ async def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
     return sub
 
 
-# ─── Round 3: Reverse Coding ──────────────────────────────────────────────────
+# --- Round 3: Reverse Coding ---
 
 @router.post("/round3", response_model=SubmissionOut)
 async def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
@@ -156,7 +152,6 @@ async def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
     sub.submitted_code = data.code
     sub.submitted_at = datetime.utcnow()
 
-    # ← runs in thread pool; event loop free to handle other requests
     eval_result = await _evaluate_async(data.language, data.code, q.test_cases or [])
     sub.test_results = eval_result["results"]
 
@@ -166,7 +161,7 @@ async def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
 
     sub.marks_awarded = round(q.points * ratio, 2)
     sub.is_correct = ratio == 1.0
-    sub.execution_output = f"{'✅' if ratio == 1.0 else '⚠️'} {passed}/{total} test cases passed"
+    sub.execution_output = f"{'[PASS]' if ratio == 1.0 else '[PARTIAL]'} {passed}/{total} test cases passed"
 
     if sub.is_correct and user and not user.r3_end:
         user.r3_end = datetime.utcnow()
@@ -176,7 +171,7 @@ async def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
     return sub
 
 
-# ─── Submission History ───────────────────────────────────────────────────────
+# --- Submission History ---
 
 @router.get("/history/{user_id}/{question_id}", response_model=SubmissionOut)
 def get_submission(user_id: int, question_id: int, db: Session = Depends(get_db)):
