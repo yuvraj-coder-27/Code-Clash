@@ -1,10 +1,29 @@
-import requests
 import subprocess
 import tempfile
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .config import PISTON_API_URL, LANGUAGE_MAP
+
+# ─── Persistent HTTP session with connection pooling + retries ─────────────────
+
+_session = requests.Session()
+_retry = Retry(total=2, backoff_factor=0.2, status_forcelist=[500, 502, 503])
+_adapter = HTTPAdapter(
+    max_retries=_retry,
+    pool_connections=10,
+    pool_maxsize=20,
+)
+_session.mount("https://", _adapter)
+_session.mount("http://", _adapter)
+
+# Thread pool for parallel test-case execution
+_executor = ThreadPoolExecutor(max_workers=8)
 
 
 def run_code(language: str, code: str, stdin: str = "", timeout: int = 5) -> dict:
@@ -36,11 +55,11 @@ def _run_via_piston(language: str, code: str, stdin: str, timeout: int) -> dict:
         "compile_timeout": 10000,
     }
 
-    resp = requests.post(PISTON_API_URL, json=payload, timeout=15)
+    resp = _session.post(PISTON_API_URL, json=payload, timeout=12)
     resp.raise_for_status()
     data = resp.json()
 
-    run_data = data.get("run", {})
+    run_data     = data.get("run", {})
     compile_data = data.get("compile", {})
 
     stderr = compile_data.get("stderr", "") + run_data.get("stderr", "")
@@ -115,43 +134,60 @@ def _exec(cmd, stdin: str, cwd: str, timeout: int) -> dict:
         return {"stdout": "", "stderr": str(e), "success": False}
 
 
-# ─── Test Case Evaluator ───────────────────────────────────────────────────────
+# ─── Test Case Evaluator (parallel) ───────────────────────────────────────────
+
+def _run_single(tc: dict, language: str, code: str) -> dict:
+    """Run one test case and return its result dict."""
+    is_hidden = tc.get("is_hidden", False)
+    inp       = tc.get("input", "")
+    expected  = tc.get("expected_output", "").strip()
+
+    result = run_code(language, code, stdin=inp)
+    actual = result["stdout"].strip()
+    ok     = actual == expected
+
+    return {
+        "input":     inp      if not is_hidden else "🔒 Hidden",
+        "expected":  expected if not is_hidden else "🔒 Hidden",
+        "actual":    actual,
+        "passed":    ok,
+        "stderr":    result["stderr"],
+        "is_hidden": is_hidden,
+        "_order":    id(tc),   # used to restore original order
+    }
+
 
 def evaluate_against_test_cases(
     language: str, code: str, test_cases: list, show_hidden: bool = False
 ) -> dict:
     """
-    Run code against all test cases.
+    Run code against all test cases in parallel.
     Returns aggregated results and marks ratio.
     """
-    results = []
-    passed = 0
+    if not test_cases:
+        return {"results": [], "passed": 0, "total": 0, "ratio": 0}
 
-    for tc in test_cases:
-        is_hidden = tc.get("is_hidden", False)
-        inp = tc.get("input", "")
-        expected = tc.get("expected_output", "").strip()
+    # Submit all test cases concurrently
+    future_to_idx = {
+        _executor.submit(_run_single, tc, language, code): i
+        for i, tc in enumerate(test_cases)
+    }
 
-        result = run_code(language, code, stdin=inp)
-        actual = result["stdout"].strip()
-        ok = actual == expected
+    ordered = [None] * len(test_cases)
+    for future in as_completed(future_to_idx):
+        idx = future_to_idx[future]
+        ordered[idx] = future.result()
 
-        if ok:
-            passed += 1
+    # Clean up internal ordering key
+    for r in ordered:
+        r.pop("_order", None)
 
-        results.append({
-            "input": inp if not is_hidden else "🔒 Hidden",
-            "expected": expected if not is_hidden else "🔒 Hidden",
-            "actual": actual,
-            "passed": ok,
-            "stderr": result["stderr"],
-            "is_hidden": is_hidden,
-        })
+    passed = sum(1 for r in ordered if r["passed"])
+    total  = len(test_cases)
 
-    total = len(test_cases)
     return {
-        "results": results,
-        "passed": passed,
-        "total": total,
-        "ratio": passed / total if total else 0,
+        "results": ordered,
+        "passed":  passed,
+        "total":   total,
+        "ratio":   passed / total if total else 0,
     }

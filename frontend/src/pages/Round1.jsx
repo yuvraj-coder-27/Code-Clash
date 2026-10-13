@@ -159,15 +159,7 @@ export default function Round1() {
               <div className="flex-1 flex flex-col">
                 <div className="flex items-center gap-3 px-4 py-2 bg-gray-900 border-b border-gray-800">
                   <span className="text-xs text-gray-500">Language:</span>
-                  <select
-                    value={lang}
-                    onChange={e => setLang(e.target.value)}
-                    disabled={isLocked || isSolved}
-                    className="bg-gray-800 text-gray-200 text-xs rounded px-2 py-1 border border-gray-700"
-                  >
-                    <option value="c">C</option>
-                    <option value="cpp">C++</option>
-                  </select>
+                  <span className="text-xs text-gray-200 font-semibold uppercase">{lang === 'cpp' ? 'C++' : lang.toUpperCase()}</span>
                 </div>
                 <div className="flex-1">
                   <Editor

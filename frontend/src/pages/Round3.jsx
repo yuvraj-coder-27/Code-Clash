@@ -7,6 +7,12 @@ import { Repeat2, CheckCircle, ChevronLeft } from 'lucide-react'
 
 const MONACO_MAP = { c: 'c', cpp: 'cpp', python: 'python' }
 
+const LANG_TEMPLATES = {
+  python: `# Write your solution here\n`,
+  c: `#include <stdio.h>\n\nint main() {\n    // Write your solution here\n    return 0;\n}\n`,
+  cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your solution here\n    return 0;\n}\n`,
+}
+
 export default function Round3() {
   const { user } = useUser()
   const navigate = useNavigate()
@@ -148,7 +154,7 @@ export default function Round3() {
                   value={lang}
                   onChange={e => {
                     setLang(e.target.value)
-                    setCode('// Write your solution here\n')
+                    setCode(LANG_TEMPLATES[e.target.value] || '')
                   }}
                   className="bg-gray-800 text-gray-200 text-xs rounded px-2 py-1 border border-gray-700"
                 >

@@ -1,6 +1,8 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+import asyncio
+from functools import partial
 
 from ..database import get_db
 from ..models import User, Question, Submission
@@ -31,10 +33,19 @@ def _get_or_create_submission(db, user_id, question_id, round_num) -> Submission
     return sub
 
 
+async def _evaluate_async(language: str, code: str, test_cases: list) -> dict:
+    """Run evaluate_against_test_cases in a thread so the event loop stays free."""
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(
+        None,
+        partial(evaluate_against_test_cases, language, code, test_cases),
+    )
+
+
 # ─── Round 1: Bug Finding & Fixing ────────────────────────────────────────────
 
 @router.post("/round1", response_model=SubmissionOut)
-def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
+async def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
     max_attempts = ROUND_CONFIG[1]["max_attempts"]  # 3
 
     q = db.query(Question).filter(Question.id == data.question_id, Question.round == 1).first()
@@ -62,7 +73,8 @@ def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
     sub.submitted_code = data.code
     sub.submitted_at = datetime.utcnow()
 
-    eval_result = evaluate_against_test_cases(data.language, data.code, q.test_cases or [])
+    # ← runs in thread pool; event loop free to handle other requests
+    eval_result = await _evaluate_async(data.language, data.code, q.test_cases or [])
     sub.test_results = eval_result["results"]
 
     if eval_result["ratio"] == 1.0:
@@ -71,12 +83,11 @@ def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
         pct = [1.0, 0.8, 0.6][sub.attempts_used - 1]
         sub.marks_awarded = round(q.points * pct, 2)
         sub.execution_output = "✅ All test cases passed!"
-        # Record round end
         if user:
             user.r1_end = datetime.utcnow()
     else:
         passed = eval_result["passed"]
-        total = eval_result["total"]
+        total  = eval_result["total"]
         sub.is_correct = False
         sub.marks_awarded = 0.0
         sub.execution_output = f"❌ {passed}/{total} test cases passed"
@@ -89,7 +100,7 @@ def submit_bug_fix(data: SubmitBugFix, db: Session = Depends(get_db)):
 # ─── Round 2: Guess the Output (MCQ) ─────────────────────────────────────────
 
 @router.post("/round2", response_model=SubmissionOut)
-def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
+async def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
     q = db.query(Question).filter(Question.id == data.question_id, Question.round == 2).first()
     if not q:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -128,7 +139,7 @@ def submit_mcq(data: SubmitMCQ, db: Session = Depends(get_db)):
 # ─── Round 3: Reverse Coding ──────────────────────────────────────────────────
 
 @router.post("/round3", response_model=SubmissionOut)
-def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
+async def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
     if data.language not in ("c", "cpp", "python"):
         raise HTTPException(status_code=400, detail="Invalid language")
 
@@ -145,12 +156,13 @@ def submit_reverse(data: SubmitReverse, db: Session = Depends(get_db)):
     sub.submitted_code = data.code
     sub.submitted_at = datetime.utcnow()
 
-    eval_result = evaluate_against_test_cases(data.language, data.code, q.test_cases or [])
+    # ← runs in thread pool; event loop free to handle other requests
+    eval_result = await _evaluate_async(data.language, data.code, q.test_cases or [])
     sub.test_results = eval_result["results"]
 
     passed = eval_result["passed"]
-    total = eval_result["total"]
-    ratio = eval_result["ratio"]
+    total  = eval_result["total"]
+    ratio  = eval_result["ratio"]
 
     sub.marks_awarded = round(q.points * ratio, 2)
     sub.is_correct = ratio == 1.0

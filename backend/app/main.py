@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from .database import engine, SessionLocal
 from .models import Base
@@ -10,6 +11,9 @@ from .routers import users, questions, submissions, leaderboard
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="CodeClash Contest API", version="1.0.0")
+
+# Compress responses > 1 KB — helps leaderboard & question payloads
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Allow React frontend
 app.add_middleware(
