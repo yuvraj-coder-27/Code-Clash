@@ -10,7 +10,7 @@ from urllib3.util.retry import Retry
 
 from .config import PISTON_API_URL, LANGUAGE_MAP
 
-# ─── Persistent HTTP session with connection pooling + retries ─────────────────
+# --- Persistent HTTP session with connection pooling + retries ---
 
 _session = requests.Session()
 _retry = Retry(total=2, backoff_factor=0.2, status_forcelist=[500, 502, 503])
@@ -37,7 +37,7 @@ def run_code(language: str, code: str, stdin: str = "", timeout: int = 5) -> dic
         return _run_locally(language, code, stdin, timeout)
 
 
-# ─── Piston Cloud Runner ───────────────────────────────────────────────────────
+# --- Piston Cloud Runner ---
 
 def _run_via_piston(language: str, code: str, stdin: str, timeout: int) -> dict:
     lang_cfg = LANGUAGE_MAP.get(language)
@@ -48,10 +48,10 @@ def _run_via_piston(language: str, code: str, stdin: str, timeout: int) -> dict:
 
     payload = {
         "language": lang_cfg["language"],
-        "version": lang_cfg["version"],
-        "files": [{"name": filename, "content": code}],
-        "stdin": stdin,
-        "run_timeout": timeout * 1000,
+        "version":  lang_cfg["version"],
+        "files":    [{"name": filename, "content": code}],
+        "stdin":    stdin,
+        "run_timeout":     timeout * 1000,
         "compile_timeout": 10000,
     }
 
@@ -68,7 +68,7 @@ def _run_via_piston(language: str, code: str, stdin: str, timeout: int) -> dict:
     return {"stdout": stdout, "stderr": stderr, "success": True}
 
 
-# ─── Local Fallback Runner ─────────────────────────────────────────────────────
+# --- Local Fallback Runner ---
 
 def _run_locally(language: str, code: str, stdin: str, timeout: int) -> dict:
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -124,8 +124,8 @@ def _exec(cmd, stdin: str, cwd: str, timeout: int) -> dict:
             timeout=timeout,
         )
         return {
-            "stdout": proc.stdout,
-            "stderr": proc.stderr,
+            "stdout":  proc.stdout,
+            "stderr":  proc.stderr,
             "success": proc.returncode == 0,
         }
     except subprocess.TimeoutExpired:
@@ -134,26 +134,43 @@ def _exec(cmd, stdin: str, cwd: str, timeout: int) -> dict:
         return {"stdout": "", "stderr": str(e), "success": False}
 
 
-# ─── Test Case Evaluator (parallel) ───────────────────────────────────────────
+# --- Output Normalizer ---
+
+def _normalize(text: str) -> str:
+    """
+    Normalize program output for comparison:
+    - Unify line endings (CRLF / CR -> LF)
+    - Strip trailing whitespace from each line
+    - Remove trailing blank lines
+    This prevents false failures due to platform differences.
+    """
+    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    lines = [line.rstrip() for line in lines]
+    while lines and lines[-1] == "":
+        lines.pop()
+    return "\n".join(lines)
+
+
+# --- Test Case Evaluator (parallel) ---
 
 def _run_single(tc: dict, language: str, code: str) -> dict:
     """Run one test case and return its result dict."""
     is_hidden = tc.get("is_hidden", False)
     inp       = tc.get("input", "")
-    expected  = tc.get("expected_output", "").strip()
+    expected  = _normalize(tc.get("expected_output", ""))
 
     result = run_code(language, code, stdin=inp)
-    actual = result["stdout"].strip()
+    actual = _normalize(result["stdout"])
     ok     = actual == expected
 
     return {
-        "input":     inp      if not is_hidden else "🔒 Hidden",
-        "expected":  expected if not is_hidden else "🔒 Hidden",
+        "input":     inp      if not is_hidden else "[Hidden]",
+        "expected":  expected if not is_hidden else "[Hidden]",
         "actual":    actual,
         "passed":    ok,
         "stderr":    result["stderr"],
         "is_hidden": is_hidden,
-        "_order":    id(tc),   # used to restore original order
+        "_order":    id(tc),
     }
 
 
