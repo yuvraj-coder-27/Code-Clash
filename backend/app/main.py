@@ -15,11 +15,11 @@ app = FastAPI(title="CodeClash Contest API", version="1.0.0")
 # Compress responses > 1 KB — helps leaderboard & question payloads
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Allow React frontend
+# Allow all origins (localhost dev + Vercel + any custom domain)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
