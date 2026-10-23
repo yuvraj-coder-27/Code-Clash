@@ -5,373 +5,373 @@ from .models import Question
 SEED_QUESTIONS = [
 
     # ═══════════════════════════════════════════════════════════
-    # ROUND 1 — C & C++ (5 MCQs + 5 Debugging)
+    # ROUND 1 — C & C++ (5 FRESH MCQs + 5 FRESH Debugging)
     # ═══════════════════════════════════════════════════════════
 
     # --- R1: MCQs (Q1 to Q5) ---
     {
         "round": 1, "order": 1, "question_type": "mcq", "language": "c", "points": 10,
-        "title": "Pre/Post Increment Puzzle",
+        "title": "Bitwise Shift & Precedence",
         "description": "What is the output of the following C code snippet?",
         "code_template": """\
 #include <stdio.h>
 int main() {
-    int x = 5;
-    printf("%d %d\\n", x++, ++x);
+    int a = 2;
+    int b = a << 1 + 2;
+    printf("%d\\n", b);
     return 0;
 }""",
-        "mcq_options": ["5 7", "6 7", "5 6", "6 6"],
+        "mcq_options": ["16", "6", "8", "4"],
         "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 1, "order": 2, "question_type": "mcq", "language": "c", "points": 10,
-        "title": "Integer Division in C",
-        "description": "What does this C code output?",
+        "title": "Ternary Operator Side Effect",
+        "description": "What will be printed by this C code?",
         "code_template": """\
 #include <stdio.h>
 int main() {
-    int a = 7, b = 2;
-    printf("%.1f\\n", a / b);
+    int x = 10, y = 20;
+    int z = (x > y) ? x++ : y++;
+    printf("%d %d %d\\n", x, y, z);
     return 0;
 }""",
-        "mcq_options": ["3.5", "3.0", "0.0", "3"],
-        "correct_option_index": 1,
+        "mcq_options": ["10 21 20", "11 20 20", "10 21 21", "11 21 20"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 1, "order": 3, "question_type": "mcq", "language": "c", "points": 10,
-        "title": "Pointer Arithmetic",
+        "title": "Static Variable Persistence",
         "description": "What is the output of the following C program?",
         "code_template": """\
 #include <stdio.h>
+void counter() {
+    static int count = 1;
+    printf("%d ", count);
+    count += 2;
+}
 int main() {
-    int arr[] = {10, 20, 30, 40, 50};
-    int *p = arr;
-    p += 2;
-    printf("%d\\n", *p);
+    counter();
+    counter();
+    counter();
     return 0;
 }""",
-        "mcq_options": ["10", "20", "30", "40"],
-        "correct_option_index": 2,
+        "mcq_options": ["1 3 5 ", "1 1 1 ", "3 5 7 ", "1 2 3 "],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
-        "round": 1, "order": 4, "question_type": "mcq", "language": "c", "points": 10,
-        "title": "sizeof String Literal",
-        "description": "What is printed by this C code?",
-        "code_template": """\
-#include <stdio.h>
-int main() {
-    char s[] = "hello";
-    printf("%d\\n", (int)sizeof(s));
-    return 0;
-}""",
-        "mcq_options": ["5", "6", "4", "8"],
-        "correct_option_index": 1,
-        "test_cases": None,
-    },
-    {
-        "round": 1, "order": 5, "question_type": "mcq", "language": "cpp", "points": 10,
-        "title": "C++ Reference Variable",
-        "description": "What is the output of this C++ program?",
+        "round": 1, "order": 4, "question_type": "mcq", "language": "cpp", "points": 10,
+        "title": "Default Arguments in C++",
+        "description": "What is printed by this C++ program?",
         "code_template": """\
 #include <iostream>
 using namespace std;
+int calc(int a, int b = 5) {
+    return a * b;
+}
 int main() {
-    int a = 10, b = 20;
-    int &r = a;
-    r = b;
-    b = 30;
-    cout << a << " " << r << endl;
+    cout << calc(3) + calc(2, 3) << endl;
     return 0;
 }""",
-        "mcq_options": ["10 10", "20 20", "20 30", "30 30"],
-        "correct_option_index": 1,
+        "mcq_options": ["21", "20", "25", "18"],
+        "correct_option_index": 0,
+        "test_cases": None,
+    },
+    {
+        "round": 1, "order": 5, "question_type": "mcq", "language": "c", "points": 10,
+        "title": "Pointer Indexing on String",
+        "description": "What is the output of this C code snippet?",
+        "code_template": """\
+#include <stdio.h>
+int main() {
+    char *str = "GATEWAY";
+    printf("%c %c\\n", *str, *(str + 4));
+    return 0;
+}""",
+        "mcq_options": ["G W", "G E", "A W", "G A"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
 
     # --- R1: Debugging (Q6 to Q10) ---
     {
         "round": 1, "order": 6, "question_type": "debugging", "language": "c", "points": 20,
-        "title": "Array Sum Off-By-One",
-        "description": "The function below should return the sum of all elements in the array of size n. Find and fix the error.",
+        "title": "Celsius to Fahrenheit Converter",
+        "description": "Convert Celsius temperature to Fahrenheit using the standard formula F = (9/5)*C + 32. Find and fix the error.",
         "code_template": """\
 #include <stdio.h>
 
-int arraySum(int arr[], int n) {
-    int sum = 0;
-    for (int i = 0; i <= n; i++) {
-        sum += arr[i];
-    }
-    return sum;
-}
-
 int main() {
-    int n;
-    scanf("%d", &n);
-    int arr[100];
-    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
-    printf("%d\\n", arraySum(arr, n));
+    int c;
+    scanf("%d", &c);
+    int f = (9 / 5) * c + 32;
+    printf("%d\\n", f);
     return 0;
 }""",
         "test_cases": [
-            {"input": "5\n1 2 3 4 5\n", "expected_output": "15", "is_hidden": False},
-            {"input": "3\n10 20 30\n", "expected_output": "60", "is_hidden": True},
+            {"input": "100\n", "expected_output": "212", "is_hidden": False},
+            {"input": "0\n", "expected_output": "32", "is_hidden": False},
+            {"input": "25\n", "expected_output": "77", "is_hidden": True},
         ],
     },
     {
         "round": 1, "order": 7, "question_type": "debugging", "language": "cpp", "points": 20,
-        "title": "Factorial Crash for Zero",
-        "description": "The recursive factorial function below does not handle n = 0 properly. Fix the base case so it returns 1 for n = 0.",
+        "title": "Prime Number Check",
+        "description": "Given integer N, print YES if N is prime, otherwise print NO. Find and fix the error in the loop logic.",
         "code_template": """\
 #include <iostream>
 using namespace std;
 
-int factorial(int n) {
-    if (n == 1) return 1;
-    return n * factorial(n - 1);
-}
-
 int main() {
     int n;
     cin >> n;
-    cout << factorial(n) << endl;
+    if (n < 2) {
+        cout << "NO" << endl;
+        return 0;
+    }
+    for (int i = 2; i <= n; i++) {
+        if (n % i == 0) {
+            cout << "NO" << endl;
+            return 0;
+        }
+    }
+    cout << "YES" << endl;
     return 0;
 }""",
         "test_cases": [
-            {"input": "0\n", "expected_output": "1", "is_hidden": False},
-            {"input": "5\n", "expected_output": "120", "is_hidden": False},
-            {"input": "1\n", "expected_output": "1", "is_hidden": True},
+            {"input": "7\n", "expected_output": "YES", "is_hidden": False},
+            {"input": "4\n", "expected_output": "NO", "is_hidden": False},
+            {"input": "1\n", "expected_output": "NO", "is_hidden": True},
+            {"input": "13\n", "expected_output": "YES", "is_hidden": True},
         ],
     },
     {
         "round": 1, "order": 8, "question_type": "debugging", "language": "c", "points": 20,
-        "title": "Swap Two Numbers",
-        "description": "The swap function below attempts to swap two integers using pointers, but fails. Find and fix the error.",
+        "title": "Count Vowels in String",
+        "description": "Count and print the number of lowercase vowels (a, e, i, o, u) present in the string. Find and fix the error.",
         "code_template": """\
 #include <stdio.h>
-
-void swap(int *a, int *b) {
-    *a = *b;
-    *b = *a;
-}
+#include <string.h>
 
 int main() {
-    int x, y;
-    scanf("%d %d", &x, &y);
-    swap(&x, &y);
-    printf("%d %d\\n", x, y);
+    char s[200];
+    scanf("%s", s);
+    int count = 0;
+    for (int i = 0; i < strlen(s); i++) {
+        char c = s[i];
+        if (c == 'a' || c == 'e' || c == 'i' || c == 'o') {
+            count++;
+        }
+    }
+    printf("%d\\n", count);
     return 0;
 }""",
         "test_cases": [
-            {"input": "3 7\n", "expected_output": "7 3", "is_hidden": False},
-            {"input": "10 20\n", "expected_output": "20 10", "is_hidden": True},
+            {"input": "programming\n", "expected_output": "3", "is_hidden": False},
+            {"input": "umbrella\n", "expected_output": "3", "is_hidden": False},
+            {"input": "sky\n", "expected_output": "0", "is_hidden": True},
         ],
     },
     {
         "round": 1, "order": 9, "question_type": "debugging", "language": "c", "points": 20,
-        "title": "Reverse an Integer",
-        "description": "The program should reverse the digits of a given positive integer. Find and fix the error causing incorrect output or timeout.",
+        "title": "Average of Three Numbers",
+        "description": "Calculate and print the average of three numbers formatted to 2 decimal places. Find and fix the operator precedence error.",
         "code_template": """\
 #include <stdio.h>
 
 int main() {
-    int n, rev = 0;
-    scanf("%d", &n);
-    while (n > 0) {
-        rev = rev * 10 + n % 10;
-    }
-    printf("%d\\n", rev);
+    double a, b, c;
+    scanf("%lf %lf %lf", &a, &b, &c);
+    double avg = a + b + c / 3.0;
+    printf("%.2f\\n", avg);
     return 0;
 }""",
         "test_cases": [
-            {"input": "1234\n", "expected_output": "4321", "is_hidden": False},
-            {"input": "500\n", "expected_output": "5", "is_hidden": True},
+            {"input": "10 20 30\n", "expected_output": "20.00", "is_hidden": False},
+            {"input": "5 5 5\n", "expected_output": "5.00", "is_hidden": False},
+            {"input": "1 2 4\n", "expected_output": "2.33", "is_hidden": True},
         ],
     },
     {
         "round": 1, "order": 10, "question_type": "debugging", "language": "cpp", "points": 20,
-        "title": "Find Minimum in Array",
-        "description": "The program should find and print the smallest number in an array. Find and fix the error.",
+        "title": "Simple Arithmetic Calculator",
+        "description": "Read two integers and an operator (+, -, *), and print the calculated result. Find and fix the switch statement error.",
         "code_template": """\
 #include <iostream>
 using namespace std;
 
 int main() {
-    int n;
-    cin >> n;
-    int arr[100];
-    for (int i = 0; i < n; i++) cin >> arr[i];
-
-    int minVal = arr[0];
-    for (int i = 1; i < n; i++) {
-        if (arr[i] > minVal) {
-            minVal = arr[i];
-        }
+    int a, b;
+    char op;
+    cin >> a >> b >> op;
+    int res = 0;
+    switch (op) {
+        case '+': res = a + b; break;
+        case '-': res = a - b; break;
+        case '*': res = a * b;
+        default: res = 0; break;
     }
-    cout << minVal << endl;
+    cout << res << endl;
     return 0;
 }""",
         "test_cases": [
-            {"input": "5\n8 3 9 1 6\n", "expected_output": "1", "is_hidden": False},
-            {"input": "3\n12 5 20\n", "expected_output": "5", "is_hidden": True},
+            {"input": "6 3 *\n", "expected_output": "18", "is_hidden": False},
+            {"input": "10 4 +\n", "expected_output": "14", "is_hidden": False},
+            {"input": "15 5 -\n", "expected_output": "10", "is_hidden": True},
         ],
     },
 
 
     # ═══════════════════════════════════════════════════════════
-    # ROUND 2 — PYTHON (5 MCQs + 5 Debugging)
+    # ROUND 2 — PYTHON (5 FRESH MCQs + 5 FRESH Debugging)
     # ═══════════════════════════════════════════════════════════
 
     # --- R2: MCQs (Q1 to Q5) ---
     {
         "round": 2, "order": 1, "question_type": "mcq", "language": "python", "points": 10,
-        "title": "Mutable Default Arguments",
-        "description": "What is the output of the following Python code?",
+        "title": "String Split and Join",
+        "description": "What is the output of the following Python snippet?",
         "code_template": """\
-def add_item(val, lst=[]):
-    lst.append(val)
-    return lst
-
-print(add_item(1))
-print(add_item(2))""",
-        "mcq_options": ["[1]\n[2]", "[1]\n[1, 2]", "[1, 2]\n[1, 2]", "Error"],
-        "correct_option_index": 1,
+s = "alpha-beta-gamma"
+parts = s.split("-")
+print(":".join(parts[::2]))""",
+        "mcq_options": ["alpha:gamma", "alpha:beta:gamma", "beta", "alpha:beta"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 2, "order": 2, "question_type": "mcq", "language": "python", "points": 10,
-        "title": "List Step Slicing",
-        "description": "What is the output of this Python snippet?",
+        "title": "Nested List Inside Tuple",
+        "description": "What is printed after executing this code?",
         "code_template": """\
-a = [10, 20, 30, 40, 50, 60]
-print(a[1:5:2])""",
-        "mcq_options": ["[20, 40]", "[20, 30, 40]", "[10, 30, 50]", "[20, 40, 60]"],
+t = (1, [2, 3], 4)
+t[1].append(5)
+print(len(t[1]), len(t))""",
+        "mcq_options": ["3 3", "2 3", "TypeError", "3 4"],
         "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 2, "order": 3, "question_type": "mcq", "language": "python", "points": 10,
-        "title": "Boolean Arithmetic in Python",
-        "description": "What does this Python expression output?",
+        "title": "Set Symmetric Difference",
+        "description": "What is the output of the following set operation?",
         "code_template": """\
-result = True + True * 3
-print(result)""",
-        "mcq_options": ["True", "6", "4", "Error"],
-        "correct_option_index": 2,
+s1 = {1, 2, 3, 4}
+s2 = {3, 4, 5, 6}
+print(sorted(list(s1 ^ s2)))""",
+        "mcq_options": ["[1, 2, 5, 6]", "[3, 4]", "[1, 2, 3, 4, 5, 6]", "[1, 2]"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 2, "order": 4, "question_type": "mcq", "language": "python", "points": 10,
-        "title": "List Identity vs Equality",
+        "title": "List Comprehension with Filter",
         "description": "What will be printed?",
         "code_template": """\
-a = [1, 2, 3]
-b = a[:]
-print(a == b, a is b)""",
-        "mcq_options": ["True True", "True False", "False True", "False False"],
-        "correct_option_index": 1,
+nums = [x * 2 for x in range(6) if x % 2 == 0]
+print(sum(nums))""",
+        "mcq_options": ["12", "30", "6", "18"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
         "round": 2, "order": 5, "question_type": "mcq", "language": "python", "points": 10,
-        "title": "Dictionary Keys Type Coercion",
-        "description": "What is the output of this dictionary operation?",
+        "title": "Nested Lambda Execution",
+        "description": "What does this nested lambda invocation evaluate to?",
         "code_template": """\
-d = {}
-d[1] = "alpha"
-d[1.0] = "beta"
-print(len(d), d[1])""",
-        "mcq_options": ["2 alpha", "2 beta", "1 beta", "1 alpha"],
-        "correct_option_index": 2,
+f = lambda a, b: a if a > b else b
+print(f(15, f(25, 10)))""",
+        "mcq_options": ["25", "15", "10", "50"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
 
     # --- R2: Debugging (Q6 to Q10) ---
     {
         "round": 2, "order": 6, "question_type": "debugging", "language": "python", "points": 20,
-        "title": "Sum of Even Numbers",
-        "description": "The program should compute the sum of all even numbers from a space-separated list of integers. Find and fix the error.",
+        "title": "Sum of Digits",
+        "description": "Calculate and print the sum of digits of a given positive integer. Find and fix the error.",
         "code_template": """\
-nums = list(map(int, input().split()))
+n = int(input())
 total = 0
 
-for x in nums:
-    if x % 2 != 0:
-        total += x
+while n > 0:
+    total += n // 10
+    n //= 10
 
 print(total)""",
         "test_cases": [
-            {"input": "1 2 3 4 5 6\n", "expected_output": "12", "is_hidden": False},
-            {"input": "7 9 11\n", "expected_output": "0", "is_hidden": True},
+            {"input": "123\n", "expected_output": "6", "is_hidden": False},
+            {"input": "405\n", "expected_output": "9", "is_hidden": False},
+            {"input": "99\n", "expected_output": "18", "is_hidden": True},
         ],
     },
     {
         "round": 2, "order": 7, "question_type": "debugging", "language": "python", "points": 20,
-        "title": "Case-Insensitive Palindrome",
-        "description": "The program should print YES if the given string is a palindrome (ignoring uppercase/lowercase), otherwise NO. Find and fix the error.",
+        "title": "Multiplication Table Generator",
+        "description": "Print the multiplication table of N from 1 to 5 in the exact format shown. Find and fix the error.",
         "code_template": """\
-s = input().strip()
+n = int(input())
 
-if s == s[::-1]:
-    print("YES")
-else:
-    print("NO")""",
+for i in range(1, 6):
+    print(f"{n} x {i} = {n * n}")""",
         "test_cases": [
-            {"input": "Racecar\n", "expected_output": "YES", "is_hidden": False},
-            {"input": "hello\n", "expected_output": "NO", "is_hidden": False},
-            {"input": "Madam\n", "expected_output": "YES", "is_hidden": True},
+            {"input": "3\n", "expected_output": "3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15", "is_hidden": False},
+            {"input": "5\n", "expected_output": "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25", "is_hidden": True},
         ],
     },
     {
         "round": 2, "order": 8, "question_type": "debugging", "language": "python", "points": 20,
-        "title": "Count Vowels in String",
-        "description": "Count how many vowels (a, e, i, o, u) are present in the lowercase input string. Find and fix the error.",
+        "title": "Find Maximum in List",
+        "description": "Read space-separated integers and print the maximum value. Find and fix the initialization bug that causes failure on negative numbers.",
         "code_template": """\
-s = input().strip().lower()
-vowels = "aeio"
-count = 0
+nums = list(map(int, input().split()))
+max_val = 0
 
-for char in s:
-    if char in vowels:
-        count += 1
+for x in nums:
+    if x > max_val:
+        max_val = x
 
-print(count)""",
+print(max_val)""",
         "test_cases": [
-            {"input": "programming\n", "expected_output": "3", "is_hidden": False},
-            {"input": "universe\n", "expected_output": "4", "is_hidden": True},
+            {"input": "3 7 2 9 4\n", "expected_output": "9", "is_hidden": False},
+            {"input": "-5 -1 -8 -3\n", "expected_output": "-1", "is_hidden": False},
+            {"input": "10 20 30\n", "expected_output": "30", "is_hidden": True},
         ],
     },
     {
         "round": 2, "order": 9, "question_type": "debugging", "language": "python", "points": 20,
-        "title": "Average of List",
-        "description": "Calculate and print the average of a list of floats formatted to 2 decimal places. Find and fix the error.",
+        "title": "Count Words in Sentence",
+        "description": "Given a sentence, count and print the total number of words. Find and fix the delimiter error.",
         "code_template": """\
-vals = list(map(float, input().split()))
-avg = sum(vals) // len(vals)
-print(f"{avg:.2f}")""",
+s = input().strip()
+words = s.split(",")
+print(len(words))""",
         "test_cases": [
-            {"input": "10 20 30\n", "expected_output": "20.00", "is_hidden": False},
-            {"input": "5 10\n", "expected_output": "7.50", "is_hidden": True},
+            {"input": "Hello world this is CodeClash\n", "expected_output": "5", "is_hidden": False},
+            {"input": "Coding contest\n", "expected_output": "2", "is_hidden": False},
+            {"input": "Python\n", "expected_output": "1", "is_hidden": True},
         ],
     },
     {
         "round": 2, "order": 10, "question_type": "debugging", "language": "python", "points": 20,
-        "title": "Remove Duplicates Preserve Order",
-        "description": "Print the elements of the list without duplicates, in the order of their first appearance. Find and fix the error.",
+        "title": "Check Power of Two",
+        "description": "Print YES if the positive integer N is a power of 2 (1, 2, 4, 8, 16...), otherwise print NO. Find and fix the bitwise condition error.",
         "code_template": """\
-items = input().split()
-unique = []
+n = int(input())
 
-for item in items:
-    if item not in unique:
-        unique.append(items)
-
-print(" ".join(unique))""",
+if n > 0 and (n & (n - 1)) != 0:
+    print("YES")
+else:
+    print("NO")""",
         "test_cases": [
-            {"input": "apple banana apple cherry\n", "expected_output": "apple banana cherry", "is_hidden": False},
-            {"input": "a b c a b\n", "expected_output": "a b c", "is_hidden": True},
+            {"input": "16\n", "expected_output": "YES", "is_hidden": False},
+            {"input": "10\n", "expected_output": "NO", "is_hidden": False},
+            {"input": "1\n", "expected_output": "YES", "is_hidden": True},
+            {"input": "64\n", "expected_output": "YES", "is_hidden": True},
         ],
     },
 
@@ -388,8 +388,8 @@ print(" ".join(unique))""",
         "code_template": """\
 // Binary Search divides the search space in half each step:
 int binarySearch(int arr[], int n, int target);""",
-        "mcq_options": ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
-        "correct_option_index": 1,
+        "mcq_options": ["O(log N)", "O(1)", "O(N)", "O(N log N)"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
@@ -400,8 +400,8 @@ int binarySearch(int arr[], int n, int target);""",
 // Stack operations:
 push(1); push(2); pop(); push(3); push(4); pop();
 // What is on top?""",
-        "mcq_options": ["1", "2", "3", "4"],
-        "correct_option_index": 2,
+        "mcq_options": ["3", "1", "2", "4"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
@@ -411,8 +411,8 @@ push(1); push(2); pop(); push(3); push(4); pop();
         "code_template": """\
 // QuickSort recursion with poor pivot choice:
 T(N) = T(N - 1) + O(N);""",
-        "mcq_options": ["O(log N)", "O(N)", "O(N log N)", "O(N^2)"],
-        "correct_option_index": 3,
+        "mcq_options": ["O(N^2)", "O(log N)", "O(N)", "O(N log N)"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
     {
@@ -438,8 +438,8 @@ T(N) = T(N - 1) + O(N);""",
         "code_template": """\
 // Binary tree max nodes formula:
 // Level 1: 1, Level 2: 2, Level 3: 4...""",
-        "mcq_options": ["2^H", "2^H - 1", "2^(H - 1)", "2H"],
-        "correct_option_index": 1,
+        "mcq_options": ["2^H - 1", "2^H", "2^(H - 1)", "2H"],
+        "correct_option_index": 0,
         "test_cases": None,
     },
 
@@ -588,15 +588,11 @@ int main() {
 
 
 def seed_database(db: Session):
-    # If 30 questions already seeded, skip
-    if db.query(Question).count() >= len(SEED_QUESTIONS):
-        return
-
-    # Clear any old questions and re-seed clean 30 questions
+    # Always wipe questions table and re-seed all 30 clean questions
     db.query(Question).delete()
     for q_data in SEED_QUESTIONS:
         q = Question(**q_data)
         db.add(q)
 
     db.commit()
-    print(f"[OK] Seeded {len(SEED_QUESTIONS)} questions into database.")
+    print(f"[OK] Seeded {len(SEED_QUESTIONS)} fresh questions into database.")
